@@ -18,13 +18,15 @@ rezultat = 40/100 * primul + 60/100 * doilea
 # ------------------------------------------
 
 # Γ( 4,3 ) - gamma stats.gamma(α,0,1/λ)
+# Distribuţia Γ(α, λ) se poate apela cu stats.gamma(α,0,1/λ)
 
-λ1 = 4
+λ = 4
+latenta = stats.expon.rvs(0, 1/λ, 1000)
 
-unu   = stats.gamma.rvs( 4.3 ,0,1/λ1, size=1000)
-doi   = stats.gamma.rvs( 4.2 ,0,1/λ1, size=1000)
-trei  = stats.gamma.rvs( 5.2 ,0,1/λ1, size=1000)
-patru = stats.gamma.rvs( 5.3 ,0,1/λ1, size=1000)
+unu   = stats.gamma.rvs( 4 ,0,1/3, size=1000) + latenta
+doi   = stats.gamma.rvs( 4 ,0,1/2, size=1000) + latenta
+trei  = stats.gamma.rvs( 5 ,0,1/2, size=1000) + latenta
+patru = stats.gamma.rvs( 5 ,0,1/3, size=1000) + latenta
 
 # către primul server cu probabilitatea 0.25,
 # către al doilea cu probabilitatea 0.25, 
@@ -34,28 +36,36 @@ patru = stats.gamma.rvs( 5.3 ,0,1/λ1, size=1000)
 
 rezultat = 0.25*unu + 0.25*doi + 0.30*trei + 0.20*patru
 
-# az.plot_posterior({'a':unu, 'b':doi, 'c':trei, 'd':patru, 'r':rezultat}) 
-# plt.show() 
+# az.plot_posterior({'l':latenta, 'a':unu, 'b':doi, 'c':trei, 'd':patru})
+# az.plot_posterior({'r':rezultat}) 
 
+# plt.show() 
 # -------------------------------------------------------------------
 
-# x = stats.norm.rvs(0, 1, size=10000)
+# Random variates
+# una nemăsluită 0.5/0.5
+bn1 = stats.binom.rvs(n=1, p=0.5, size=10)
 
-# az.plot_posterior({'x':x}) #,'y':y,'z':z}) # Afisarea aproximarii densitatii probabilitatilor, mediei, intervalului etc. variabilelor x,y,z
-# plt.show() 
+# cealaltă cu probabilitatea de 0.3 de a obţine stemă
+bn2 = stats.binom.rvs(n=1, p=0.3, size=10)
 
-from scipy.stats import bernoulli
+# cealaltă cu probabilitatea de 0.7 
+bn3 = stats.binom.rvs(n=1, p=0.7, size=10)
 
-# np.random.seed(42)
+# ss
+bnSS = bn1*bn2
 
-coin_flip = stats.bernoulli.rvs(0.30, 0, size=10)
-print(coin_flip)
+# sb
+bnSB = bn1*bn3
 
-y1 = bernoulli.ppf(coin_flip, 0, 7) 
-plt.plot(coin_flip, y1, "*") 
+# bb
+bnBB = bn1*bn3
 
-plt.show() 
+# bs
+bnBS = bn1*bn2
 
+az.plot_posterior({'ss':bnSS, 'sb':bnSB, 'bb':bnBB, 'bs':bnBS}) 
+plt.show()
 
 
 
