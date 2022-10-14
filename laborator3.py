@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     p_cutremur = df[((df['cutremur'] == 1) & (df['activare'] == 1))].shape[0] / df[df['activare'] == 1].shape[0]
 
-    p_incendiu = df[((df['activare'] == 0) & (df['incendiu'] == 1))].shape[0] / df[df['incendiu'] == 1].shape[0]
+    p_incendiu = df[((df['incendiu'] == 1) & (df['activare'] == 0))].shape[0] / df[df['activare'] == 0].shape[0]
 
     print(p_cutremur)
     print(p_incendiu)
