@@ -8,14 +8,17 @@ import arviz as az
 if __name__ == '__main__':
 
     model = pm.Model()
+    #for x in range(1,15):
 
+    α = 10
     with model:
-                                                #  clienti pe minut 1/3
-        clienti     = pm.Poisson("clienti", 20/60)
+                            #  clienti pe minut 1/3
+        clienti     = pm.Poisson("C", 20/60)
+        BoundedNormal = pm.Bound(pm.Normal, lower=0.0)
                                     #  mean, Standard deviation
-        timp        = pm.Normal("timp",   1,    0.5)
-        α = 10
-        statieGatit = pm.Exponential("statie_de_gatit", α)
+        timp        = BoundedNormal("T",   1,    0.5)
+        
+        statieGatit = pm.Exponential("SG", α)
         trace = pm.sample(20000)
 
     dictionary = {
@@ -25,3 +28,6 @@ if __name__ == '__main__':
             }
                 
     df = pd.DataFrame(dictionary)
+
+    #p_servire = df[((df['clienti'] == 1) & (df['statieGatit'] == 1))].shape[0] / df[df['clienti'] == 1].shape[0]
+    #print(p_servire)
