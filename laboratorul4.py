@@ -8,26 +8,34 @@ import arviz as az
 if __name__ == '__main__':
 
     model = pm.Model()
-    #for x in range(1,15):
 
-    α = 10
     with model:
                             #  clienti pe minut 1/3
-        clienti     = pm.Poisson("C", 20/60)
+                            #  clienti pe ora
+        clienti     = pm.Poisson("C", 20)
         BoundedNormal = pm.Bound(pm.Normal, lower=0.0)
-                                    #  mean, Standard deviation
+                                    #   mean, Standard deviation
         timp        = BoundedNormal("T",   1,    0.5)
-        
+
+        α = 0.15 # -> prin incercari
+        BoundedExponential = pm.Bound(pm.Exponential, lower=0.0)
         statieGatit = pm.Exponential("SG", α)
-        trace = pm.sample(20000)
+
+        timpServire = BoundedNormal("TS",mu=statieGatit, sd=timp )
+        #az.plot_posterior({'a':clienti})
+        trace = pm.sample(1000) #, return_inferencedata=True)
+    #az.plot_trace(trace)
 
     dictionary = {
-            'clienti': trace['C'].tolist(),
-            'timp': trace['T'].tolist(),
-            'statieGatit': trace['SG'].tolist()
+            #'clienti': trace['C'].tolist(),
+            #'timp': trace['T'].tolist(),
+            #'statieGatit': trace['SG'].tolist(),
+            'timpServire': trace['TS'].tolist()
             }
                 
     df = pd.DataFrame(dictionary)
 
-    #p_servire = df[((df['clienti'] == 1) & (df['statieGatit'] == 1))].shape[0] / df[df['clienti'] == 1].shape[0]
-    #print(p_servire)
+    p_servire = df[(df['timpServire'] < 15)].shape[0] / df.shape[0]
+    print(p_servire)
+    print(df['timpServire'].mean())
+    print(df['timpServire'].max())
