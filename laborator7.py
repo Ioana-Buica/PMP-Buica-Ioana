@@ -34,13 +34,16 @@ if __name__ == "__main__":
     X1_centered = X1 - X1_mean
 
     # x2 este logaritmul (natural) al mărimii hard diskului.
-    X2 = np.log(hardDrive)
+    # X2 = np.log(hardDrive)
+    X2 = hardDrive
     X2_mean = X2.mean(axis=0, keepdims=True)
     X2_centered = X2 - X2_mean
 
     with pm.Model() as model_mlr:
         α_tmp = pm.Normal('α_tmp', mu=0, sd=10)
-        sigma = pm.HalfNormal('sigma', sd=1)
+        
+        # sigma = pm.HalfNormal('sigma', sd=1)
+        sigma = pm.HalfNormal('sigma', 5)
 
         β1 = pm.Normal('β1', mu=0, sd=1)
         β2 = pm.Normal('β2', mu=0, sd=1)
@@ -48,7 +51,6 @@ if __name__ == "__main__":
         # μ  =  pm.Deterministic('μ',α + β1*X1 +  β2*X2 )
         μ = α_tmp + pm.math.dot(X1_centered, β1) + pm.math.dot(X2_centered, β2)
 
-        
         α = pm.Deterministic('α', α_tmp - pm.math.dot(X1_mean, β1) - pm.math.dot(X2_mean, β2))
 
         data_price = pm.Normal('data_price', 
@@ -60,7 +62,7 @@ if __name__ == "__main__":
         # trace = pm.sample(20000, tune=20000, cores=4)
 
     # az.plot_trace(trace, var_names=['α', "β1", "β2", "sigma"])
-    az.plot_posterior(trace, var_names=['α', "β1", "β2", "sigma"])
+    az.plot_posterior(trace)
 
 
     # ex2 - az.plot_posterior / sample(return_inferencedata=True)
