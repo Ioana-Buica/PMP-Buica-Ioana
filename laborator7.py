@@ -1,3 +1,7 @@
+from mpl_toolkits import mplot3d
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 import arviz as az
 import matplotlib.pyplot as plt
@@ -16,7 +20,7 @@ if __name__ == "__main__":
     ram = data['Ram'].values
     premium = data['Premium'].values
     
-    fig, axes = plt.subplots(2, 2, sharex=False, figsize=(10, 8))
+    """fig, axes = plt.subplots(2, 2, sharex=False, figsize=(10, 8))
     axes[0,0].scatter(speed, price, alpha=0.6)
     axes[0,1].scatter(hardDrive, price, alpha=0.6)
     axes[1,0].scatter(ram, price, alpha=0.6)
@@ -25,44 +29,49 @@ if __name__ == "__main__":
     axes[0,0].set_xlabel("Speed")
     axes[0,1].set_xlabel("HardDrive")
     axes[1,0].set_xlabel("Ram")
-    axes[1,1].set_xlabel("Premium")
+    axes[1,1].set_xlabel("Premium")"""
     #plt.savefig('price_correlations.png')
+
+    Y  = price
 
     # x1 este frecvenţa procesorului
     X1 = speed
-    X1_mean = X1.mean(axis=0, keepdims=True)
-    X1_centered = X1 - X1_mean
 
     # x2 este logaritmul (natural) al mărimii hard diskului.
-    # X2 = np.log(hardDrive)
-    X2 = hardDrive
-    X2_mean = X2.mean(axis=0, keepdims=True)
-    X2_centered = X2 - X2_mean
+    X2 = np.log(hardDrive)
+    # X2 = hardDrive
 
-    with pm.Model() as model_mlr:
-        α_tmp = pm.Normal('α_tmp', mu=0, sd=10)
-        
-        # sigma = pm.HalfNormal('sigma', sd=1)
-        sigma = pm.HalfNormal('sigma', 5)
+    with pm.Model() as model_RLM:
+        α = pm.Normal('α', mu=0, sd=10)
+        β1 = pm.Normal('β1', mu=0, sigma=10)
+        β2 = pm.Normal('β2', mu=0, sd=10)
 
-        β1 = pm.Normal('β1', mu=0, sd=1)
-        β2 = pm.Normal('β2', mu=0, sd=1)
+        ε = pm.HalfCauchy('ε', 5)
 
-        # μ  =  pm.Deterministic('μ',α + β1*X1 +  β2*X2 )
-        μ = α_tmp + pm.math.dot(X1_centered, β1) + pm.math.dot(X2_centered, β2)
+        μ = β1*X1 + β2*X2 + α
 
-        α = pm.Deterministic('α', α_tmp - pm.math.dot(X1_mean, β1) - pm.math.dot(X2_mean, β2))
+        y_pred = pm.Normal( 'y_pred',
+                            mu = μ, 
+                            sd = ε, 
+                            observed = Y)
 
-        data_price = pm.Normal('data_price', 
-                                mu=μ, 
-                                sd=sigma, 
-                                observed=price)
+        samples = pm.sample(
+                            init='advi+adapt_diag',
+                            return_inferencedata=True)
 
-        trace = pm.sample(200, return_inferencedata=True)
-        # trace = pm.sample(20000, tune=20000, cores=4)
+    #az.plot_posterior(samples)
+    
+    #az.plot_trace(samples, var_names=['α', 'β1', 'β2', 'ε'])
+    #az.summary(samples, var_names=['α', 'β1', 'β2', 'ε'])
 
-    # az.plot_trace(trace, var_names=['α', "β1", "β2", "sigma"])
-    az.plot_posterior(trace)
+    az.plot_forest( samples,
+                    model_names=['model_RLM'],
+                    var_names=['β1', 'β2'],
+                    combined=False, colors='cycle', 
+                    figsize=(8, 3))
 
+    # ex 3 - Nu sunt predictori utili ai preţului de vânzare
+    plt.scatter(X1, X2)
 
-    # ex2 - az.plot_posterior / sample(return_inferencedata=True)
+    plt.show()
+   
