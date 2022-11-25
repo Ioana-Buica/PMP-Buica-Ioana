@@ -24,13 +24,13 @@ if __name__ == "__main__":
         α = pm.Normal('α', mu=0, sd=10)
         β = pm.Normal('β', mu=0, sd=2, shape=len(x_n)+1)
 
-        μ = α + pm.math.dot(gpa, β[0]) + pm.math.dot(gre, β[0])
+        μ = α + pm.math.dot(gpa, β[0]) + pm.math.dot(gre, β[1])
         θ = pm.Deterministic('θ', 1 / (1 + pm.math.exp(-μ)))
 
         bd = pm.Deterministic('bd', -α/β[1] - β[0]/β[1] * x_1[:,0])
         yl = pm.Bernoulli('yl', p=θ, observed=y_1)
 
-        idata_1 = pm.sample( target_accept=0.9, return_inferencedata=True)
+        idata_1 = pm.sample(1, target_accept=0.9, return_inferencedata=True)
 
     az.plot_posterior(idata_1)
 
@@ -45,3 +45,8 @@ if __name__ == "__main__":
 
     plt.xlabel(x_n[0])
     plt.ylabel(x_n[1])
+
+    """az.plot_forest( idata_1,
+                    model_names=['model_0'],
+                    var_names=['μ', 'β2'],
+                    combined=False, colors='cycle', figsize=(8, 3))"""
