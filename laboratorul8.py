@@ -26,27 +26,51 @@ if __name__ == "__main__":
 
         μ = α + pm.math.dot(gpa, β[0]) + pm.math.dot(gre, β[1])
         θ = pm.Deterministic('θ', 1 / (1 + pm.math.exp(-μ)))
+        bd = pm.Deterministic('bd', -α/β[1] - β[0]/β[1] * gpa)
 
-        bd = pm.Deterministic('bd', -α/β[1] - β[0]/β[1] * x_1[:,0])
         yl = pm.Bernoulli('yl', p=θ, observed=y_1)
+        idata_1 = pm.sample(2000, target_accept=0.9, return_inferencedata=True)
 
-        idata_1 = pm.sample(1, target_accept=0.9, return_inferencedata=True)
-
-    az.plot_posterior(idata_1)
+    #az.plot_posterior(idata_1)
 
 
     idx = np.argsort(x_1[:,0])
     bd = idata_1.posterior['bd'].mean(("chain", "draw"))[idx]
+    
     plt.scatter(x_1[:,0], x_1[:,1], c=[f'C{x}' for x in y_1])
     plt.plot(x_1[:,0][idx], bd, color='k')
 
-    az.plot_hdi(x_1[:,0], idata_1.posterior['bd'], color='k')
-    # az.plot_hdi(x_1[:,0], idata_1.posterior['bd'],hdi_prob=0.94, color='k')
+    az.plot_hdi(x_1[:,0], idata_1.posterior['bd'],  hdi_prob=0.94, color='k')
 
     plt.xlabel(x_n[0])
     plt.ylabel(x_n[1])
 
-    """az.plot_forest( idata_1,
-                    model_names=['model_0'],
-                    var_names=['μ', 'β2'],
-                    combined=False, colors='cycle', figsize=(8, 3))"""
+    plt.savefig('Granita_de_decizie.png')
+
+    gpa = [3.5]
+    gre = [550]
+
+    ppc = pm.sample_posterior_predictive(idata_1, 2000, model=model_0)
+    y_ppc = ppc['yl'][:, 0]
+
+    grid, pdf = az.kde(y_ppc)
+    az.plot_hdi(grid, pdf, hdi_prob=0.90)
+
+    plt.xlabel('Admission')
+    plt.yticks([])
+
+    plt.savefig('Admission_ex3.png')
+
+    gpa = [3.2]
+    gre = [500]
+
+    ppc = pm.sample_posterior_predictive(idata_1, 2000, model=model_0)
+    y_ppc = ppc['yl'][:, 0]
+
+    grid, pdf = az.kde(y_ppc)
+    az.plot_hdi(grid, pdf, hdi_prob=0.90)
+
+    plt.xlabel('Admission')
+    plt.yticks([])
+
+    plt.savefig('Admission_ex3.png')
