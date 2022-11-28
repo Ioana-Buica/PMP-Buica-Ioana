@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     y_1 = pd.Categorical(data['Admission']).codes
     x_n = ['GRE', 'GPA']
-    x_1 = data[x_n].values
+    x_1 = data[x_n].values  
 
     with pm.Model() as model_0:
         α = pm.Normal('α', mu=0, sd=10)
@@ -32,15 +32,15 @@ if __name__ == "__main__":
         idata_1 = pm.sample(2000, target_accept=0.9, return_inferencedata=True)
 
     #az.plot_posterior(idata_1)
+    #plt.savefig('idata_1.png')
 
-
-    idx = np.argsort(x_1[:,0])
+    idx = np.argsort(gpa)
     bd = idata_1.posterior['bd'].mean(("chain", "draw"))[idx]
     
-    plt.scatter(x_1[:,0], x_1[:,1], c=[f'C{x}' for x in y_1])
-    plt.plot(x_1[:,0][idx], bd, color='k')
+    plt.scatter(gpa, gre, c=[f'C{x}' for x in y_1])
+    plt.plot(gpa[idx], bd, color='k')
 
-    az.plot_hdi(x_1[:,0], idata_1.posterior['bd'],  hdi_prob=0.94, color='k')
+    az.plot_hdi(gpa, idata_1.posterior['bd'],  hdi_prob=0.94, color='k')
 
     plt.xlabel(x_n[0])
     plt.ylabel(x_n[1])
@@ -73,4 +73,7 @@ if __name__ == "__main__":
     plt.xlabel('Admission')
     plt.yticks([])
 
-    plt.savefig('Admission_ex3.png')
+    plt.savefig('Admission_ex4.png')
+
+    # ex4: Rezultatele optinute sunt in functie de datele cu care
+    # s-a atrenat modelul
