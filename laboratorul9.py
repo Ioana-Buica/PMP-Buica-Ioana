@@ -16,11 +16,11 @@ if __name__ == '__main__':
 # ---- ex 2 ----------------------------------------------------
     while len(x_1) != 500:
         number = round(random.uniform(-1.081, 3.970), 3)
-        x_1.append(number)
+        x_1 = np.append(x_1,number)
 
     while len(y_1) != 500:
         number = round(random.uniform(-7.854, 9.357), 3)
-        x_1.append(number)
+        y_1 = np.append(y_1,number)
 
 # --------------------------------------------------------------
     order = 5
