@@ -29,7 +29,8 @@ if __name__ == '__main__':
     az.plot_autocorr(data2, var_names=['mu', 'tau'])
     plt.show()
 
-    print(data1.diverging.sum())
+    print(data1.sample_stats.diverging.sum())
+    print(data2.sample_stats.diverging.sum())
 
     _, ax = plt.subplots(1, 2, sharey=True, sharex=True, 
                          figsize=(10, 5), constrained_layout=True)
